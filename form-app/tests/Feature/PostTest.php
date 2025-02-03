@@ -80,4 +80,29 @@ class PostTest extends TestCase
 
         $this->assertEquals($user->id, $retrievedPost->user->id);
     }
+
+    /** @test */
+    public function 公開日時を指定して投稿できる()
+    {
+        $response = $this->post('/posts', [
+            'title' => '公開テスト',
+            'content' => '公開日時のテスト',
+            'published_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response->assertRedirect('/posts');
+        $this->assertDatabaseHas('posts', ['title' => '公開テスト', 'published_at' => now()->format('Y-m-d H:i:s')]);
+    }
+
+    /** @test */
+    public function 無効な公開日時を指定するとエラーになる()
+    {
+        $response = $this->post('/posts', [
+            'title' => '無効な日付テスト',
+            'content' => '日付が間違っている',
+            'published_at' => 'not-a-date', // 無効な日付
+        ]);
+
+        $response->assertSessionHasErrors(['published_at']);
+    }
 }
