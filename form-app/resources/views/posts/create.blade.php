@@ -24,6 +24,8 @@
         <br>
         <label>内容:</label>
         <textarea name="content">{{ old('content') }}</textarea>
+        <label>公開日時:</label>
+        <input type="datetime-local" name="published_at" value="{{ old('published_at') }}">
         <br>
         <button type="submit">投稿</button>
     </form>

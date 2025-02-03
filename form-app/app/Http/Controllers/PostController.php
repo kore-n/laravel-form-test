@@ -9,7 +9,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::published()->get();
         return view('posts.index', compact('posts'));
     }
 
@@ -23,6 +23,7 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:1000',
+            'published_at' => 'nullable|date',
         ]);
 
         Post::create($validated);
