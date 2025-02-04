@@ -9,7 +9,10 @@ class Post extends Model
 {
     use HasFactory;
     protected $fillable = ['title', 'content', 'published_at', 'user_id'];
-
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);

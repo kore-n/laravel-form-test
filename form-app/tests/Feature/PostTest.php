@@ -105,4 +105,33 @@ class PostTest extends TestCase
 
         $response->assertSessionHasErrors(['published_at']);
     }
+
+    /** @test */
+    public function 投稿を編集できる()
+    {
+        $post = Post::factory()->create([
+            'title' => '元のタイトル',
+            'content' => '元の内容',
+        ]);
+
+        $response = $this->put("/posts/{$post->id}", [
+            'title' => '新しいタイトル',
+            'content' => '新しい内容',
+            'published_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response->assertRedirect('/posts');
+        $this->assertDatabaseHas('posts', ['title' => '新しいタイトル']);
+    }
+
+    /** @test */
+    public function 投稿を削除できる()
+    {
+        $post = Post::factory()->create();
+
+        $response = $this->delete("/posts/{$post->id}");
+
+        $response->assertRedirect('/posts');
+        $this->assertDatabaseMissing('posts', ['id' => $post->id]);
+    }
 }
