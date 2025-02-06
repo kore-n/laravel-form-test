@@ -9,7 +9,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::published()->get();
+        $posts = Post::get();
         return view('posts.index', compact('posts'));
     }
 

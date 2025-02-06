@@ -134,4 +134,15 @@ class PostTest extends TestCase
         $response->assertRedirect('/posts');
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
+
+    /** @test */
+    public function タイトルが大文字で保存される()
+    {
+        $post = new Post();
+        $post->title = 'Laravelの勉強';
+        $post->content = 'テスト投稿';
+        $post->save();
+
+        $this->assertEquals('LARAVELの勉強', $post->fresh()->title);
+    }
 }

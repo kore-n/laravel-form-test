@@ -14,7 +14,7 @@
     <div>
         <h2>{{ $post->title }}</h2>
         <p>{{ $post->content }}</p>
-        <p>公開日: {{ $post->published_at }}</p>
+        <p>公開日: {{ $post->formatted_published_at }}</p>
 
         {{-- 編集ボタン --}}
         <a href="{{ route('posts.edit', $post->id) }}">編集</a>
