@@ -7,12 +7,14 @@
 </head>
 
 <body>
+<a href="/users">ユーザー一覧</a>
     <h1>投稿一覧</h1>
     <a href="{{ route('posts.create') }}">新規投稿</a>
 
     @foreach ($posts as $post)
     <div>
         <h2>{{ $post->title }}</h2>
+        <p>投稿者: {{ $post->user->name }}</p>
         <p>{{ $post->content }}</p>
         <p>公開日: {{ $post->formatted_published_at }}</p>
 

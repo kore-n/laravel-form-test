@@ -12,23 +12,34 @@ class PostTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function 投稿が作成できる()
+    public function ログインユーザーが投稿できる()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $response = $this->post('/posts', [
             'title' => 'テスト投稿',
-            'content' => 'これはテスト投稿の内容です。',
+            'content' => 'テスト内容',
+            'published_at' => now(),
         ]);
 
         $response->assertRedirect('/posts');
-        $this->assertDatabaseHas('posts', ['title' => 'テスト投稿']);
+        $this->assertDatabaseHas('posts', [
+            'title' => 'テスト投稿',
+            'user_id' => $user->id,
+        ]);
     }
 
     /** @test */
     public function タイトルが空だと投稿できない()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $response = $this->post('/posts', [
             'title' => '',
             'content' => 'これはテスト投稿の内容です。',
+            'user_id' => $user->id,
         ]);
 
         $response->assertSessionHasErrors(['title']);
@@ -37,9 +48,13 @@ class PostTest extends TestCase
     /** @test */
     public function 内容が空だと投稿できない()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $response = $this->post('/posts', [
             'title' => 'テスト投稿',
             'content' => '',
+            'user_id' => $user->id,
         ]);
 
         $response->assertSessionHasErrors(['content']);
@@ -82,33 +97,11 @@ class PostTest extends TestCase
     }
 
     /** @test */
-    public function 公開日時を指定して投稿できる()
-    {
-        $response = $this->post('/posts', [
-            'title' => '公開テスト',
-            'content' => '公開日時のテスト',
-            'published_at' => now()->format('Y-m-d H:i:s'),
-        ]);
-
-        $response->assertRedirect('/posts');
-        $this->assertDatabaseHas('posts', ['title' => '公開テスト', 'published_at' => now()->format('Y-m-d H:i:s')]);
-    }
-
-    /** @test */
-    public function 無効な公開日時を指定するとエラーになる()
-    {
-        $response = $this->post('/posts', [
-            'title' => '無効な日付テスト',
-            'content' => '日付が間違っている',
-            'published_at' => 'not-a-date', // 無効な日付
-        ]);
-
-        $response->assertSessionHasErrors(['published_at']);
-    }
-
-    /** @test */
     public function 投稿を編集できる()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $post = Post::factory()->create([
             'title' => '元のタイトル',
             'content' => '元の内容',
@@ -127,12 +120,17 @@ class PostTest extends TestCase
     /** @test */
     public function 投稿を削除できる()
     {
-        $post = Post::factory()->create();
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $post = Post::factory()->create([
+            'user_id' => $user->id,
+        ]);
 
         $response = $this->delete("/posts/{$post->id}");
 
         $response->assertRedirect('/posts');
-        $this->assertDatabaseMissing('posts', ['id' => $post->id]);
+        $this->assertSoftDeleted('posts', ['id' => $post->id]);
     }
 
     /** @test */

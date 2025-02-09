@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::get();
+        $posts = Auth::user()->posts()->get();
         return view('posts.index', compact('posts'));
     }
 
@@ -20,13 +21,17 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::check()) {
+            abort(403, 'ログインしていません'); // 🔥 未認証ならエラーメッセージを返す
+        }
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:1000',
             'published_at' => 'nullable|date',
         ]);
 
-        Post::create($validated);
+        Auth::user()->posts()->create($validated);
 
         return redirect()->route('posts.index')->with('success', '投稿が作成されました！');
     }
