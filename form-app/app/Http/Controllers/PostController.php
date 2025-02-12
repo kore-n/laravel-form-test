@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 
 class PostController extends Controller
 {
@@ -19,19 +21,9 @@ class PostController extends Controller
         return view('posts.create');
     }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        if (!Auth::check()) {
-            abort(403, 'ログインしていません'); // 🔥 未認証ならエラーメッセージを返す
-        }
-        
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string|max:1000',
-            'published_at' => 'nullable|date',
-        ]);
-
-        Auth::user()->posts()->create($validated);
+        Auth::user()->posts()->create($request->validated());
 
         return redirect()->route('posts.index')->with('success', '投稿が作成されました！');
     }
@@ -41,16 +33,10 @@ class PostController extends Controller
         return view('posts.edit', compact('post'));
     }
     
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string|max:1000',
-            'published_at' => 'nullable|date',
-        ]);
-    
-        $post->update($validated);
-    
+        $post->update($request->validated());
+        
         return redirect()->route('posts.index')->with('success', '投稿が更新されました！');
     }
 
