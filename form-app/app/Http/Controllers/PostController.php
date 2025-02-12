@@ -12,7 +12,10 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Auth::user()->posts()->get();
+        $posts = Auth::user()->posts()->get()->map(function ($post) {
+            $post->title = strtoupper($post->title); // 🔥 直接オブジェクトのプロパティを変更
+            return $post;
+        });
         return view('posts.index', compact('posts'));
     }
 
@@ -36,7 +39,7 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         $post->update($request->validated());
-        
+
         return redirect()->route('posts.index')->with('success', '投稿が更新されました！');
     }
 
